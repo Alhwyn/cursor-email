@@ -21,29 +21,26 @@ export const defaultPassportData: PassportData = {
   title: "Founder",
   company: "Photobomb.online",
   companyUrl: "https://photobomb.online",
-  passportNumber: "CUR2026001",
+  passportNumber: "CURSORVIC2026001",
   issueDate: "27 JUL 2026",
-  eventDate: "22 Aug 2026",
+  eventDate: "August 22nd",
   stampDate: "22 AUG\n2026",
   location: "Victoria, BC",
   accessTier: "Builder",
   entries: "Multiple (M)",
   authority: "Cursor Dept. of Events",
-  eventTitle: "Codechella 2026",
+  eventTitle: "Codechella Victoria",
 };
 
-function padMrz(value: string, length: number): string {
-  const cleaned = value
-    .toUpperCase()
-    .replace(/[^A-Z0-9]/g, "<")
-    .replace(/<+/g, "<");
-  return (cleaned + "<".repeat(length)).slice(0, length);
-}
-
-export function buildMrz(data: Pick<PassportData, "firstName" | "lastName" | "passportNumber">): [string, string] {
-  const line1 = `P<CUR<${padMrz(data.lastName, 20)}${padMrz(data.firstName, 15)}`;
-  const line2 = `${padMrz(data.passportNumber, 9)}CUR8505187M2608228${"<".repeat(15)}0`;
-  return [line1.slice(0, 44), line2.slice(0, 44)];
+/** MRZ-style lines — event branding + filler numbers, padded to fill width. */
+export function buildMrz(): [string, string] {
+  const length = 72;
+  const line1 = "P<CUR<<CURSOR<<CODECHELLA";
+  const line2 = "84729163<CUR2608227M<<<<<<<291847630<<<<<<<0";
+  return [
+    (line1 + "<".repeat(length)).slice(0, length),
+    (line2 + "<".repeat(length)).slice(0, length),
+  ];
 }
 
 export function buildPassportUrl(

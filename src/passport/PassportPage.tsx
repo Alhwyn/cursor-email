@@ -6,6 +6,100 @@ import {
 } from "./passportData";
 import "./passport.css";
 
+type Sticker = {
+  src: string;
+  alt: string;
+  rotate: number;
+  top: string;
+  left: string;
+  z: number;
+  width: number;
+};
+
+const SPONSOR_STICKERS: Sticker[] = [
+  {
+    src: "/assets/sponsors/convex.png",
+    alt: "Convex",
+    rotate: -14,
+    top: "6%",
+    left: "2%",
+    z: 3,
+    width: 150,
+  },
+  {
+    src: "/assets/sponsors/shipaton.png",
+    alt: "Ship-a-ton",
+    rotate: 8,
+    top: "2%",
+    left: "28%",
+    z: 7,
+    width: 190,
+  },
+  {
+    src: "/assets/sponsors/firecrawl.png",
+    alt: "Firecrawl",
+    rotate: -5,
+    top: "8%",
+    left: "62%",
+    z: 4,
+    width: 152,
+  },
+  {
+    src: "/assets/sponsors/exa.png",
+    alt: "Exa",
+    rotate: 18,
+    top: "24%",
+    left: "38%",
+    z: 9,
+    width: 96,
+  },
+  {
+    src: "/assets/sponsors/wispr-flow.png",
+    alt: "Wispr Flow",
+    rotate: -10,
+    top: "36%",
+    left: "4%",
+    z: 5,
+    width: 164,
+  },
+  {
+    src: "/assets/sponsors/gmi.png",
+    alt: "GMI",
+    rotate: 9,
+    top: "30%",
+    left: "52%",
+    z: 8,
+    width: 136,
+  },
+  {
+    src: "/assets/sponsors/render.png",
+    alt: "Render",
+    rotate: -13,
+    top: "54%",
+    left: "16%",
+    z: 6,
+    width: 144,
+  },
+  {
+    src: "/assets/sponsors/elevenlabs.png",
+    alt: "ElevenLabs",
+    rotate: 12,
+    top: "50%",
+    left: "46%",
+    z: 4,
+    width: 170,
+  },
+  {
+    src: "/assets/sponsors/solana.png",
+    alt: "Solana",
+    rotate: -8,
+    top: "68%",
+    left: "28%",
+    z: 7,
+    width: 172,
+  },
+];
+
 function IdentityRow({
   label,
   value,
@@ -38,7 +132,6 @@ export function PassportPage() {
   const [data, setData] = useState<PassportData>(() =>
     readPassportFromSearch(window.location.search),
   );
-  const [copied, setCopied] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -53,17 +146,7 @@ export function PassportPage() {
     document.title = `${data.firstName} ${data.lastName} · Codechella Passport`;
   }, [data.firstName, data.lastName]);
 
-  const [mrz1, mrz2] = useMemo(() => buildMrz(data), [data]);
-
-  async function handleShare() {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
-    } catch {
-      window.prompt("Copy this passport link:", window.location.href);
-    }
-  }
+  const [mrz1, mrz2] = useMemo(() => buildMrz(), []);
 
   function toggleOpen() {
     setIsOpen((open) => !open);
@@ -105,13 +188,32 @@ export function PassportPage() {
               <div className="spine">Credits &amp; Sponsors</div>
               <div className="page-top-main">
                 <div className="header">
-                  <div className="dots">
-                    <span className="dot green" />
-                    <span className="dot blue" />
-                  </div>
+                  <img
+                    className="cursor-wordmark"
+                    src="/assets/cursor-lockup-light.png"
+                    alt="Cursor"
+                    width={120}
+                    height={28}
+                  />
                   <h1 className="event-title">{data.eventTitle}</h1>
                 </div>
-                <div className="sticker-slot" aria-label="Sticker area" />
+                <div className="sticker-field" aria-label="Sponsor stickers">
+                  {SPONSOR_STICKERS.map((sticker, index) => (
+                    <div
+                      key={`${sticker.alt}-${index}`}
+                      className="sticker"
+                      style={{
+                        top: sticker.top,
+                        left: sticker.left,
+                        zIndex: sticker.z,
+                        width: sticker.width,
+                        transform: `rotate(${sticker.rotate}deg)`,
+                      }}
+                    >
+                      <img src={sticker.src} alt={sticker.alt} draggable={false} />
+                    </div>
+                  ))}
+                </div>
               </div>
             </section>
           </div>
@@ -147,11 +249,7 @@ export function PassportPage() {
               <div className="photo-col">
                 <div className="photo">
                   <div className="photo-art" aria-hidden="true" />
-                  <div className="photo-code">
-                    <div className="qr" />
-                  </div>
                 </div>
-                <div className="photo-caption">Photo</div>
               </div>
 
               <div className="identity">
@@ -172,9 +270,6 @@ export function PassportPage() {
       </div>
 
       <div className="actions">
-        <button type="button" className="share" onClick={handleShare}>
-          {copied ? "Link copied" : "Share your passport"}
-        </button>
         <p className="meta">
           Codechella Hackathon · {data.location} · {data.eventDate}
         </p>
