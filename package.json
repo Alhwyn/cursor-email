@@ -1,0 +1,27 @@
+{
+  "name": "cursor-email",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "email:dev": "email dev --dir src/emails --port 3001",
+    "passport:dev": "vite --port 3010",
+    "passport:build": "vite build",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "typescript": "^5",
+    "vite": "^8.1.5"
+  },
+  "dependencies": {
+    "@react-email/components": "^1.0.12",
+    "@react-email/ui": "^6.9.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.2.8",
+    "react-email": "^6.0.0"
+  }
+}

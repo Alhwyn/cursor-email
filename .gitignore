@@ -1,0 +1,8 @@
+node_modules
+.DS_Store
+dist
+.react-email
+*.log
+.env
+.env.*
+!.env.example
