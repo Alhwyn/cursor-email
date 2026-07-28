@@ -122,7 +122,7 @@ export function PassportPage() {
                   <img
                     className="sponsor-banner sponsor-banner--bottom"
                     src="/assets/sponsors/logos-bottom.png"
-                    alt="Sponsors: Solana, ElevenLabs, Exa, Render, Firecrawl, Wispr Flow"
+                    alt="Sponsors: Exa, Render, Firecrawl, Wispr Flow"
                     draggable={false}
                   />
                 </div>
@@ -154,9 +154,12 @@ export function PassportPage() {
               </div>
 
               <div className="identity">
-                <IdentityRow label="Last name" value={data.lastName} />
-                <IdentityRow label="First name" value={data.firstName} />
+                <div className="identity-names">
+                  <IdentityRow label="First name" value={data.firstName} />
+                  <IdentityRow label="Last name" value={data.lastName} />
+                </div>
                 <IdentityRow label="Based in" value={data.location} />
+                <IdentityRow label="Role" value={data.accessTier} />
                 <IdentityRow
                   label="LinkedIn"
                   value={socialHandle(data.linkedin, "alhwyn")}

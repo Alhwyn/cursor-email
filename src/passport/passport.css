@@ -189,7 +189,7 @@ body {
   right: 0;
   bottom: 0;
   height: 14px;
-  z-index: 2;
+  z-index: 1;
   pointer-events: none;
   background: linear-gradient(
     to top,
@@ -223,42 +223,50 @@ body {
 .page-top-main {
   position: relative;
   min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: visible;
-  gap: 8px;
+  gap: 6px;
 }
 
 .page-top-main > .header {
   position: relative;
-  z-index: 2;
+  z-index: 4;
   flex: 0 0 auto;
+  align-self: flex-start;
+  width: fit-content;
+  max-width: 100%;
+  /* Only cover the title stack — not a full-width paper slab */
+  background-color: transparent;
 }
 
 .boats-zone {
   position: relative;
-  z-index: 0;
-  flex: 1 1 70%;
-  min-height: 260px;
+  z-index: 1;
+  /* Fill leftover space only — never steal height from sponsor logos */
+  flex: 1 1 auto;
+  min-height: 220px;
   width: 100%;
-  /* Allow slight horizontal spill into spines; vertical stays in-zone */
   overflow: visible;
+  /* Keep hulls above the sponsor strip so it can't hard-cut the drawing */
+  margin-bottom: 4px;
 }
 
 .watermark-watertaxis {
   position: absolute;
   left: 50%;
-  top: 50%;
-  /* Height-bound so flags/roofs stay fully visible (no top clip) */
+  /* Slightly high so a zoomed boat still clears the sponsor edge */
+  top: 44%;
   width: auto;
-  height: 100%;
+  height: 135%;
   max-width: none;
-  max-height: 100%;
+  max-height: none;
   transform: translate(-50%, -50%);
   object-fit: contain;
   object-position: center center;
-  opacity: 0.32;
+  opacity: 0.4;
   pointer-events: none;
   user-select: none;
   z-index: 0;
@@ -266,28 +274,30 @@ body {
 
 .sponsor-banners {
   flex: 0 0 auto;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
+  justify-content: flex-end;
+  gap: 8px;
   width: 100%;
-  padding: 8px 0 2px;
-  /* Opaque paper strip — boats never show through logos */
+  padding: 12px 0 4px;
+  overflow: visible;
+  /* Opaque paper strip — logos stay clear; boats stay above this edge */
   background-color: var(--paper);
   background-image:
     radial-gradient(rgba(110, 95, 70, 0.04) 0.55px, transparent 0.7px),
     var(--paper-grain);
   background-size: 2.5px 2.5px, 170px 170px;
   position: relative;
-  z-index: 2;
+  z-index: 3;
 }
 
 .sponsor-banner {
   display: block;
-  width: min(94%, 520px);
+  width: 100%;
   height: auto;
-  max-height: 48px;
+  max-height: none;
   object-fit: contain;
   object-position: center;
   filter: none;
@@ -295,10 +305,9 @@ body {
   pointer-events: none;
 }
 
-/* Bottom strip is 2×3 so logos match top-row glyph height */
 .sponsor-banner--bottom {
-  width: min(96%, 520px);
-  max-height: 96px;
+  width: 100%;
+  max-height: none;
 }
 
 .cover-wordmark {
@@ -371,13 +380,15 @@ body {
   text-align: left;
   margin-bottom: 0;
   flex-shrink: 0;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .cursor-wordmark {
   display: block;
   width: 120px;
   height: auto;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   border: 0;
 }
 
@@ -525,7 +536,8 @@ body {
   display: grid;
   grid-template-columns: var(--photo-size) 1fr;
   gap: 16px;
-  align-items: start;
+  align-items: center;
+  align-content: center;
   position: relative;
   z-index: 1;
   flex: 1;
@@ -560,16 +572,29 @@ body {
 .identity {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  gap: 5px;
+  align-items: stretch;
+  gap: 10px;
   min-width: 0;
   min-height: 0;
   padding-top: 0;
+  width: 100%;
 }
 
-.identity .row {
-  margin-bottom: 0;
-  flex-shrink: 0;
+.identity-names {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 16px;
+  row-gap: 0;
+  width: 100%;
+}
+
+.identity-names .row,
+.identity > .row {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: 10px;
+  align-items: baseline;
+  width: 100%;
 }
 
 .identity .label {
@@ -578,28 +603,25 @@ body {
   font-weight: 400;
   color: var(--muted);
   letter-spacing: -0.01em;
-  margin-bottom: 1px;
+  margin: 0;
+  text-align: left;
+  white-space: nowrap;
 }
 
 .identity .value,
 .identity a.value,
 .identity a.value-link {
   font-family: var(--sans);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 400;
   letter-spacing: -0.015em;
   line-height: 1.15;
   color: var(--ink);
   border-bottom: 1px solid #e0d9ce;
-  padding-bottom: 3px;
-}
-
-.identity .row:nth-child(-n + 3) .value {
-  font-size: 15px;
-}
-
-.identity .row:last-child .value {
-  letter-spacing: -0.01em;
+  padding-bottom: 2px;
+  min-width: 0;
+  text-align: left;
+  box-sizing: border-box;
 }
 
 /* Social rows stay ink + no underline (match plain identity values) */

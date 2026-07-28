@@ -1,3 +1,5 @@
+export type PassportRole = "Builder" | "Guest" | "Organizer";
+
 export interface PassportData {
   firstName: string;
   lastName: string;
@@ -9,13 +11,21 @@ export interface PassportData {
   eventDate: string;
   stampDate: string;
   location: string;
-  accessTier: string;
+  /** Attendee role: Builder, Guest, or Organizer */
+  accessTier: PassportRole;
   entries: string;
   authority: string;
   eventTitle: string;
   linkedin: string;
   twitter: string;
   github: string;
+}
+
+export function normalizeRole(value: string): PassportRole {
+  const v = value.trim().toLowerCase();
+  if (v === "guest") return "Guest";
+  if (v === "organizer") return "Organizer";
+  return "Builder";
 }
 
 export const defaultPassportData: PassportData = {
@@ -29,7 +39,7 @@ export const defaultPassportData: PassportData = {
   eventDate: "August 22nd",
   stampDate: "22 AUG\n2026",
   location: "Victoria, BC",
-  accessTier: "Builder",
+  accessTier: "Builder" as PassportRole,
   entries: "Multiple (M)",
   authority: "Cursor Dept. of Events",
   eventTitle: "Codechella Victoria 2026",
@@ -96,7 +106,11 @@ export function readPassportFromSearch(search: string): PassportData {
   for (const key of Object.keys(defaultPassportData) as Array<keyof PassportData>) {
     const value = params.get(key);
     if (value) {
-      next[key] = value;
+      if (key === "accessTier") {
+        next.accessTier = normalizeRole(value);
+      } else {
+        next[key] = value;
+      }
     }
   }
 
@@ -111,6 +125,8 @@ export function readPassportFromSearch(search: string): PassportData {
   if (!params.get("stampDate") || !/22/.test(next.stampDate)) {
     next.stampDate = "22 AUG\n2026";
   }
+
+  next.accessTier = normalizeRole(next.accessTier);
 
   return next;
 }
