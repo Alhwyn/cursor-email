@@ -287,12 +287,18 @@ body {
   display: block;
   width: min(94%, 520px);
   height: auto;
-  max-height: 52px;
+  max-height: 48px;
   object-fit: contain;
   object-position: center;
   filter: none;
   user-select: none;
   pointer-events: none;
+}
+
+/* Bottom strip is 2×3 so logos match top-row glyph height */
+.sponsor-banner--bottom {
+  width: min(96%, 520px);
+  max-height: 96px;
 }
 
 .cover-wordmark {

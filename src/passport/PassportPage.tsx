@@ -120,7 +120,7 @@ export function PassportPage() {
                     draggable={false}
                   />
                   <img
-                    className="sponsor-banner"
+                    className="sponsor-banner sponsor-banner--bottom"
                     src="/assets/sponsors/logos-bottom.png"
                     alt="Sponsors: Solana, ElevenLabs, Exa, Render, Firecrawl, Wispr Flow"
                     draggable={false}
