@@ -173,8 +173,6 @@ export function PassportPage() {
                   href={data.github}
                 />
               </div>
-
-              <div className="holo" aria-hidden="true" />
             </div>
 
             <div className="mrz">

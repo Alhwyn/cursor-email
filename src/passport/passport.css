@@ -517,7 +517,7 @@ body {
 
 .id-body {
   display: grid;
-  grid-template-columns: var(--photo-size) 1fr 10px;
+  grid-template-columns: var(--photo-size) 1fr;
   gap: 16px;
   align-items: start;
   position: relative;
@@ -609,21 +609,6 @@ body {
   display: block;
 }
 
-.holo {
-  width: 8px;
-  height: var(--photo-size);
-  border-radius: 2px;
-  background: linear-gradient(
-    180deg,
-    #a8e6cf 0%,
-    #7ec8e3 25%,
-    #c3b1e1 50%,
-    #ffd3a5 75%,
-    #a8e6cf 100%
-  );
-  margin-top: 2px;
-}
-
 .page-bottom > .mrz {
   position: absolute;
   left: 0;
@@ -690,11 +675,6 @@ body {
 
   .photo-art {
     height: auto;
-  }
-
-  .holo {
-    width: 100%;
-    height: 8px;
   }
 
   .cover-title,
