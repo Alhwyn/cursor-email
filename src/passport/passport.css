@@ -41,6 +41,7 @@
   /* Hardcover passport corners — tight top, slightly softer bottom */
   --passport-radius-top: 5px;
   --passport-radius-bottom: 7px;
+  --photo-size: 260px;
 }
 
 * {
@@ -516,7 +517,7 @@ body {
 
 .id-body {
   display: grid;
-  grid-template-columns: 184px 1fr 10px;
+  grid-template-columns: var(--photo-size) 1fr 10px;
   gap: 16px;
   align-items: start;
   position: relative;
@@ -526,19 +527,21 @@ body {
 }
 
 .photo-col {
-  width: 184px;
+  width: var(--photo-size);
+  max-width: 100%;
 }
 
 .photo {
-  width: 184px;
+  width: 100%;
   background: #111;
   border: 1px solid #333;
   overflow: hidden;
 }
 
 .photo-art {
-  width: 184px;
-  height: 184px;
+  width: 100%;
+  height: var(--photo-size);
+  aspect-ratio: 1;
   background:
     radial-gradient(circle at 30% 30%, #3b82f6 0%, transparent 40%),
     radial-gradient(circle at 70% 55%, #f54e00 0%, transparent 42%),
@@ -608,7 +611,7 @@ body {
 
 .holo {
   width: 8px;
-  height: 184px;
+  height: var(--photo-size);
   border-radius: 2px;
   background: linear-gradient(
     180deg,
@@ -679,6 +682,14 @@ body {
 
   .id-body {
     grid-template-columns: 1fr;
+  }
+
+  .photo-col {
+    width: min(var(--photo-size), 100%);
+  }
+
+  .photo-art {
+    height: auto;
   }
 
   .holo {
