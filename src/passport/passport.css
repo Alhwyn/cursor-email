@@ -23,8 +23,9 @@
 }
 
 :root {
-  --bg: #e8e4dc;
-  --paper: #f3eee5;
+  /* Page surround — Cursor.com light mode cool/neutral */
+  --bg: #f7f7f4;
+  --paper: #EDECE8;
   --cream: #faf7f2;
   --ink: #26251e;
   --muted: rgba(38, 37, 30, 0.6);
@@ -37,6 +38,9 @@
   --paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.55 0 0 0 0 0.5 0 0 0 0 0.42 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
   --ease-open: cubic-bezier(0.65, 0.05, 0.2, 1);
   --duration: 1.5s;
+  /* Hardcover passport corners — tight top, slightly softer bottom */
+  --passport-radius-top: 5px;
+  --passport-radius-bottom: 7px;
 }
 
 * {
@@ -52,9 +56,7 @@ body,
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top, rgba(245, 78, 0, 0.05), transparent 42%),
-    var(--bg);
+  background: var(--bg);
   color: var(--ink);
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
@@ -119,7 +121,8 @@ body {
 .face {
   position: absolute;
   inset: 0;
-  border-radius: 10px;
+  border-radius: var(--passport-radius-top) var(--passport-radius-top)
+    var(--passport-radius-bottom) var(--passport-radius-bottom);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   overflow: hidden;
@@ -127,6 +130,8 @@ body {
 
 .face-cover {
   border: 1px solid #cfc7ba;
+  border-radius: var(--passport-radius-top) var(--passport-radius-top)
+    var(--passport-radius-bottom) var(--passport-radius-bottom);
   cursor: pointer;
   padding: 40px 34px;
   display: flex;
@@ -150,7 +155,7 @@ body {
 
 .face-credits {
   display: grid;
-  grid-template-columns: 18px 1fr;
+  grid-template-columns: 18px 1fr 18px;
   gap: 8px;
   padding: 28px 24px 22px;
   background-color: var(--paper);
@@ -160,8 +165,19 @@ body {
   background-size: 2.5px 2.5px, 170px 170px;
   border: 1px solid #cfc7ba;
   border-bottom: 0;
-  border-radius: 10px 10px 0 0;
+  border-radius: var(--passport-radius-top) var(--passport-radius-top) 0 0;
   transform: rotateX(180deg) translateZ(1px);
+  overflow: hidden;
+}
+
+.face-credits > .spine,
+.face-credits > .page-top-main {
+  position: relative;
+  z-index: 1;
+}
+
+.face-credits > .spine {
+  z-index: 2;
 }
 
 /* Soft shadow into the open fold (stitches live on page-bottom) */
@@ -209,49 +225,73 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
-  overflow: hidden;
+  overflow: visible;
+  gap: 8px;
 }
 
-.sticker-field {
+.page-top-main > .header {
   position: relative;
-  flex: 1;
-  min-height: 0;
-  margin: 0 -6px -8px;
+  z-index: 2;
+  flex: 0 0 auto;
 }
 
-.sticker {
+.boats-zone {
+  position: relative;
+  z-index: 0;
+  flex: 1 1 62%;
+  min-height: 230px;
+  width: 100%;
+  /* Allow slight horizontal spill into spines; vertical stays in-zone */
+  overflow: visible;
+}
+
+.watermark-watertaxis {
   position: absolute;
+  left: 50%;
+  top: 50%;
+  /* Height-bound so flags/roofs stay fully visible (no top clip) */
+  width: auto;
+  height: 100%;
+  max-width: none;
+  max-height: 100%;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+  object-position: center center;
+  opacity: 0.32;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+.sponsor-banners {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 0 2px;
+  /* Opaque paper strip — boats never show through logos */
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(rgba(110, 95, 70, 0.04) 0.55px, transparent 0.7px),
+    var(--paper-grain);
+  background-size: 2.5px 2.5px, 170px 170px;
+  position: relative;
+  z-index: 2;
+}
+
+.sponsor-banner {
   display: block;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
+  width: min(94%, 520px);
+  height: auto;
+  max-height: 52px;
+  object-fit: contain;
+  object-position: center;
+  filter: none;
   user-select: none;
   pointer-events: none;
-}
-
-/* Die-cut sticker: white outline follows logo alpha, then a soft cast shadow */
-.sticker img {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-height: 44px;
-  object-fit: contain;
-  filter:
-    drop-shadow(0 1px 0 #fff)
-    drop-shadow(0 -1px 0 #fff)
-    drop-shadow(1px 0 0 #fff)
-    drop-shadow(-1px 0 0 #fff)
-    drop-shadow(1px 1px 0 #fff)
-    drop-shadow(-1px -1px 0 #fff)
-    drop-shadow(1px -1px 0 #fff)
-    drop-shadow(-1px 1px 0 #fff)
-    drop-shadow(0 2px 0 #fff)
-    drop-shadow(0 -2px 0 #fff)
-    drop-shadow(2px 0 0 #fff)
-    drop-shadow(-2px 0 0 #fff)
-    drop-shadow(2px 3px 3px rgba(40, 30, 20, 0.28));
 }
 
 .cover-wordmark {
@@ -296,7 +336,6 @@ body {
 
 .spine {
   writing-mode: vertical-rl;
-  transform: rotate(180deg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -309,16 +348,30 @@ body {
   white-space: nowrap;
 }
 
+/* Left: rotated so copy reads bottom→top along the outer edge */
+.spine-left {
+  transform: rotate(180deg);
+}
+
+/* Right: no rotate — mirror of left, same reading direction along the outer edge */
+.spine-right {
+  transform: none;
+}
+
 .header {
   position: relative;
   z-index: 8;
   text-align: left;
-  margin-bottom: 8px;
+  margin-bottom: 0;
   flex-shrink: 0;
 }
 
-.header .cursor-wordmark {
-  margin-bottom: 6px;
+.cursor-wordmark {
+  display: block;
+  width: 120px;
+  height: auto;
+  margin-bottom: 10px;
+  border: 0;
 }
 
 /* Matches cursor.com type-md-lg */
@@ -340,12 +393,14 @@ body {
   bottom: 0;
   z-index: 1;
   height: var(--page-h);
-  padding: 24px 24px 78px;
+  /* Bottom padding clears the absolute full-bleed MRZ bar */
+  padding: 24px 24px 72px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   border: 1px solid #cfc7ba;
-  border-radius: 10px;
+  border-radius: var(--passport-radius-top) var(--passport-radius-top)
+    var(--passport-radius-bottom) var(--passport-radius-bottom);
   background-color: var(--paper);
   background-image:
     radial-gradient(rgba(110, 95, 70, 0.04) 0.55px, transparent 0.7px),
@@ -356,7 +411,7 @@ body {
 }
 
 .book.is-open .page-bottom {
-  border-radius: 0 0 10px 10px;
+  border-radius: 0 0 var(--passport-radius-bottom) var(--passport-radius-bottom);
   border-top: 0;
   padding-top: 28px;
   box-shadow:
@@ -393,14 +448,14 @@ body {
   background-size: 150px 150px;
 }
 
-.watermark-building {
-  position: absolute;
-  right: 48px;
-  top: 70px;
-  width: 200px;
-  opacity: 0.16;
-  pointer-events: none;
-  user-select: none;
+.page-bottom > .id-head,
+.page-bottom > .id-body {
+  position: relative;
+  z-index: 1;
+}
+
+.page-bottom > .watermark-seal {
+  z-index: 0;
 }
 
 .watermark-seal {
@@ -428,9 +483,10 @@ body {
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   position: relative;
   z-index: 1;
+  flex-shrink: 0;
 }
 
 .id-brand {
@@ -439,13 +495,6 @@ body {
   align-items: flex-start;
   gap: 6px;
   min-width: 0;
-}
-
-.cursor-wordmark {
-  display: block;
-  width: 120px;
-  height: auto;
-  border: 0;
 }
 
 .id-brand .brand-sub {
@@ -467,28 +516,29 @@ body {
 
 .id-body {
   display: grid;
-  grid-template-columns: 168px 1fr 12px;
-  gap: 22px;
+  grid-template-columns: 148px 1fr 10px;
+  gap: 18px;
   align-items: start;
   position: relative;
   z-index: 1;
   flex: 1;
+  min-height: 0;
 }
 
 .photo-col {
-  width: 168px;
+  width: 148px;
 }
 
 .photo {
-  width: 168px;
+  width: 148px;
   background: #111;
   border: 1px solid #333;
   overflow: hidden;
 }
 
 .photo-art {
-  width: 168px;
-  height: 168px;
+  width: 148px;
+  height: 148px;
   background:
     radial-gradient(circle at 30% 30%, #3b82f6 0%, transparent 40%),
     radial-gradient(circle at 70% 55%, #f54e00 0%, transparent 42%),
@@ -501,51 +551,60 @@ body {
 .identity {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 14px;
+  justify-content: flex-start;
+  gap: 5px;
   min-width: 0;
-  padding-top: 4px;
+  min-height: 0;
+  padding-top: 0;
 }
 
 .identity .row {
   margin-bottom: 0;
+  flex-shrink: 0;
 }
 
 .identity .label {
   font-family: var(--sans);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 400;
   color: var(--muted);
   letter-spacing: -0.01em;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 
 .identity .value {
   font-family: var(--sans);
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 400;
   letter-spacing: -0.015em;
-  line-height: 1.2;
+  line-height: 1.15;
   border-bottom: 1px solid #e0d9ce;
-  padding-bottom: 8px;
+  padding-bottom: 3px;
+}
+
+.identity .row:nth-child(-n + 3) .value {
+  font-size: 15px;
 }
 
 .identity .row:last-child .value {
-  font-size: 16px;
   letter-spacing: -0.01em;
-  color: var(--ink);
 }
 
 .identity a.value {
-  color: #007aff;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  color: inherit;
+  text-decoration: none;
   display: block;
+}
+
+.identity a.value:hover,
+.identity a.value:focus-visible {
+  color: inherit;
+  text-decoration: none;
 }
 
 .holo {
   width: 8px;
-  height: 200px;
+  height: 160px;
   border-radius: 2px;
   background: linear-gradient(
     180deg,
@@ -558,7 +617,7 @@ body {
   margin-top: 2px;
 }
 
-.mrz {
+.page-bottom > .mrz {
   position: absolute;
   left: 0;
   right: 0;
@@ -568,13 +627,14 @@ body {
   width: 100%;
   margin: 0;
   background: #ddd8cf;
-  border-radius: 0 0 9px 9px;
-  padding: 12px 14px 14px;
+  border-radius: 0 0 var(--passport-radius-bottom) var(--passport-radius-bottom);
+  padding: 12px 16px 14px;
   font-family: var(--mono);
   font-size: 11px;
   letter-spacing: 0.06em;
   line-height: 1.55;
   overflow: hidden;
+  pointer-events: none;
 }
 
 .mrz > div {
@@ -607,7 +667,9 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .spine {
+  .spine,
+  .spine-left,
+  .spine-right {
     display: none;
   }
 

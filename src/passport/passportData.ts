@@ -13,6 +13,9 @@ export interface PassportData {
   entries: string;
   authority: string;
   eventTitle: string;
+  linkedin: string;
+  twitter: string;
+  github: string;
 }
 
 export const defaultPassportData: PassportData = {
@@ -29,8 +32,25 @@ export const defaultPassportData: PassportData = {
   accessTier: "Builder",
   entries: "Multiple (M)",
   authority: "Cursor Dept. of Events",
-  eventTitle: "Codechella Victoria",
+  eventTitle: "Codechella Victoria 2026",
+  linkedin: "https://www.linkedin.com/in/alhwyn",
+  twitter: "https://x.com/alhwynn",
+  github: "https://github.com/alhwyn",
 };
+
+/** Short display handle for social IdentityRows. */
+export function socialHandle(url: string, fallback: string): string {
+  if (!url.trim()) return fallback;
+  try {
+    const path = new URL(url).pathname.replace(/\/+$/, "");
+    const segment = path.split("/").filter(Boolean).pop();
+    if (!segment) return fallback;
+    if (url.includes("linkedin.com")) return segment;
+    return segment.startsWith("@") ? segment : `@${segment}`;
+  } catch {
+    return fallback;
+  }
+}
 
 /** MRZ-style lines — event branding + filler numbers, padded to fill width. */
 export function buildMrz(): [string, string] {
@@ -62,6 +82,9 @@ export function buildPassportUrl(
     entries: merged.entries,
     authority: merged.authority,
     eventTitle: merged.eventTitle,
+    linkedin: merged.linkedin,
+    twitter: merged.twitter,
+    github: merged.github,
   });
   return `${baseUrl}?${params.toString()}`;
 }
@@ -77,8 +100,15 @@ export function readPassportFromSearch(search: string): PassportData {
     }
   }
 
-  if (!params.get("stampDate") && params.get("eventDate")) {
-    // Keep a sensible stamp fallback when only eventDate is provided.
+  // Force canonical event day (rewrites stale "14–16 Aug 2026" query params).
+  const normalizedDate = next.eventDate.replace(/\s+/g, " ").trim();
+  const isAug22 =
+    /august\s*22(nd)?/i.test(normalizedDate) || /^22\s*aug/i.test(normalizedDate);
+  if (!isAug22) {
+    next.eventDate = defaultPassportData.eventDate;
+  }
+
+  if (!params.get("stampDate") || !/22/.test(next.stampDate)) {
     next.stampDate = "22 AUG\n2026";
   }
 
