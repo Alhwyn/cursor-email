@@ -55,6 +55,8 @@ export function PassportPage() {
   }, [data.firstName, data.lastName]);
 
   const [mrz1, mrz2] = useMemo(() => buildMrz(), []);
+  const stackNames =
+    data.firstName.length > 9 || data.lastName.length > 9;
 
   function toggleOpen() {
     setIsOpen((open) => !open);
@@ -160,7 +162,9 @@ export function PassportPage() {
               </div>
 
               <div className="identity">
-                <div className="identity-names">
+                <div
+                  className={`identity-names${stackNames ? " identity-names--stacked" : ""}`}
+                >
                   <IdentityRow label="First name" value={data.firstName} />
                   <IdentityRow label="Last name" value={data.lastName} />
                 </div>

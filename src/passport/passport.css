@@ -595,11 +595,31 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   column-gap: 16px;
-  row-gap: 0;
+  row-gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.identity-names--stacked {
+  grid-template-columns: 1fr;
+}
+
+/* Name pair: label above value so long names cannot collide with the other label */
+.identity-names .row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  min-width: 0;
   width: 100%;
 }
 
-.identity-names .row,
+.identity-names .value {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Other identity rows keep inline label + value */
 .identity > .row {
   display: grid;
   grid-template-columns: max-content 1fr;
