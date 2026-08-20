@@ -205,7 +205,7 @@ CursorCodechellaPassport.PreviewProps = {
   lastName: "Geonzon",
   eventName: "Codechella Hackathon",
   location: "Victoria, BC",
-  eventDate: "22 Aug 2026",
+  eventDate: "August 22nd",
   passportUrl: buildPassportUrl(PASSPORT_BASE_URL),
   ctaLabel: "Open your passport",
 } satisfies CursorCodechellaPassportProps;

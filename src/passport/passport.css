@@ -23,8 +23,9 @@
 }
 
 :root {
-  --bg: #e8e4dc;
-  --paper: #f3eee5;
+  /* Page surround — Cursor.com light mode cool/neutral */
+  --bg: #f7f7f4;
+  --paper: #EDECE8;
   --cream: #faf7f2;
   --ink: #26251e;
   --muted: rgba(38, 37, 30, 0.6);
@@ -37,6 +38,10 @@
   --paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.55 0 0 0 0 0.5 0 0 0 0 0.42 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
   --ease-open: cubic-bezier(0.65, 0.05, 0.2, 1);
   --duration: 1.5s;
+  /* Hardcover: only tighten top corners; leave bottom as before */
+  --passport-radius-top: 2px;
+  --passport-radius-bottom: 7px;
+  --photo-size: 260px;
 }
 
 * {
@@ -52,9 +57,7 @@ body,
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top, rgba(245, 78, 0, 0.05), transparent 42%),
-    var(--bg);
+  background: var(--bg);
   color: var(--ink);
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
@@ -119,7 +122,8 @@ body {
 .face {
   position: absolute;
   inset: 0;
-  border-radius: 10px;
+  border-radius: var(--passport-radius-top) var(--passport-radius-top)
+    var(--passport-radius-bottom) var(--passport-radius-bottom);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   overflow: hidden;
@@ -127,6 +131,8 @@ body {
 
 .face-cover {
   border: 1px solid #cfc7ba;
+  border-radius: var(--passport-radius-top) var(--passport-radius-top)
+    var(--passport-radius-bottom) var(--passport-radius-bottom);
   cursor: pointer;
   padding: 40px 34px;
   display: flex;
@@ -150,7 +156,7 @@ body {
 
 .face-credits {
   display: grid;
-  grid-template-columns: 18px 1fr;
+  grid-template-columns: 18px 1fr 18px;
   gap: 8px;
   padding: 28px 24px 22px;
   background-color: var(--paper);
@@ -159,9 +165,37 @@ body {
     var(--paper-grain);
   background-size: 2.5px 2.5px, 170px 170px;
   border: 1px solid #cfc7ba;
-  border-bottom: 2px dashed var(--line);
-  border-radius: 10px 10px 0 0;
+  border-bottom: 0;
+  border-radius: var(--passport-radius-top) var(--passport-radius-top) 0 0;
   transform: rotateX(180deg) translateZ(1px);
+  overflow: hidden;
+}
+
+.face-credits > .spine,
+.face-credits > .page-top-main {
+  position: relative;
+  z-index: 1;
+}
+
+.face-credits > .spine {
+  z-index: 2;
+}
+
+/* Soft shadow into the open fold (stitches live on page-bottom) */
+.face-credits::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 14px;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(70, 55, 35, 0.12) 0%,
+    transparent 100%
+  );
 }
 
 .cover-building {
@@ -187,17 +221,109 @@ body {
 }
 
 .page-top-main {
+  position: relative;
   min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   height: 100%;
+  overflow: visible;
+  gap: 6px;
+}
+
+.page-top-main > .header {
+  position: relative;
+  z-index: 4;
+  flex: 0 0 auto;
+  align-self: flex-start;
+  width: fit-content;
+  max-width: 100%;
+  /* Only cover the title stack — not a full-width paper slab */
+  background-color: transparent;
+}
+
+.boats-zone {
+  position: relative;
+  z-index: 1;
+  /* Fill leftover space only — never steal height from sponsor logos */
+  flex: 1 1 auto;
+  min-height: 220px;
+  width: 100%;
+  overflow: visible;
+  /* Keep hulls above the sponsor strip so it can't hard-cut the drawing */
+  margin-bottom: 4px;
+}
+
+.watermark-watertaxis {
+  position: absolute;
+  left: 50%;
+  /* Slightly high so a zoomed boat still clears the sponsor edge */
+  top: 44%;
+  width: auto;
+  height: 135%;
+  max-width: none;
+  max-height: none;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+  object-position: center center;
+  opacity: 0.4;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+.sponsor-banners {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 0 4px;
+  overflow: visible;
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(rgba(110, 95, 70, 0.04) 0.55px, transparent 0.7px),
+    var(--paper-grain);
+  background-size: 2.5px 2.5px, 170px 170px;
+  position: relative;
+  z-index: 3;
+}
+
+.sponsor-row {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  gap: 8px 10px;
+  width: 100%;
+}
+
+.sponsor-row:first-child {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.sponsor-row:last-child {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.sponsor-row img {
+  display: block;
+  height: 24px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center;
+  user-select: none;
+  pointer-events: none;
 }
 
 .cover-wordmark {
   display: block;
   width: 140px;
   height: auto;
-  margin-bottom: 28px;
+  margin-bottom: 10px;
 }
 
 .cover-title {
@@ -235,7 +361,6 @@ body {
 
 .spine {
   writing-mode: vertical-rl;
-  transform: rotate(180deg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -248,28 +373,32 @@ body {
   white-space: nowrap;
 }
 
+/* Left: rotated so copy reads bottom→top along the outer edge */
+.spine-left {
+  transform: rotate(180deg);
+}
+
+/* Right: no rotate — mirror of left, same reading direction along the outer edge */
+.spine-right {
+  transform: none;
+}
+
 .header {
+  position: relative;
+  z-index: 8;
   text-align: left;
-  margin-bottom: 18px;
+  margin-bottom: 0;
+  flex-shrink: 0;
+  width: fit-content;
+  max-width: 100%;
 }
 
-.dots {
-  display: inline-flex;
-  gap: 6px;
-  margin-bottom: 12px;
-}
-
-.dot {
-  width: 10px;
-  height: 10px;
-}
-
-.dot.green {
-  background: #34c759;
-}
-
-.dot.blue {
-  background: #007aff;
+.cursor-wordmark {
+  display: block;
+  width: 120px;
+  height: auto;
+  margin-bottom: 6px;
+  border: 0;
 }
 
 /* Matches cursor.com type-md-lg */
@@ -284,15 +413,6 @@ body {
   text-wrap: balance;
 }
 
-.sticker-slot {
-  flex: 1;
-  min-height: 200px;
-  width: 100%;
-  border: 1.5px dashed rgba(180, 170, 155, 0.7);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.18);
-}
-
 .page-bottom {
   position: absolute;
   left: 0;
@@ -300,12 +420,14 @@ body {
   bottom: 0;
   z-index: 1;
   height: var(--page-h);
-  padding: 24px 24px 20px;
+  /* Bottom padding clears the absolute full-bleed MRZ bar */
+  padding: 24px 24px 72px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   border: 1px solid #cfc7ba;
-  border-radius: 10px;
+  border-radius: var(--passport-radius-top) var(--passport-radius-top)
+    var(--passport-radius-bottom) var(--passport-radius-bottom);
   background-color: var(--paper);
   background-image:
     radial-gradient(rgba(110, 95, 70, 0.04) 0.55px, transparent 0.7px),
@@ -316,7 +438,30 @@ body {
 }
 
 .book.is-open .page-bottom {
-  border-radius: 0 0 10px 10px;
+  border-radius: 0 0 var(--passport-radius-bottom) var(--passport-radius-bottom);
+  border-top: 0;
+  padding-top: 28px;
+  box-shadow:
+    inset 0 10px 12px -10px rgba(50, 40, 25, 0.18),
+    0 18px 50px rgba(40, 30, 20, 0.14);
+}
+
+.page-bottom::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 18px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  background: url("/assets/passport-fold.svg") center top / 100% 18px no-repeat;
+  transition: opacity var(--duration) var(--ease-open);
+}
+
+.book.is-open .page-bottom::before {
+  opacity: 1;
 }
 
 .page-bottom::after {
@@ -330,14 +475,14 @@ body {
   background-size: 150px 150px;
 }
 
-.watermark-building {
-  position: absolute;
-  right: 48px;
-  top: 70px;
-  width: 200px;
-  opacity: 0.16;
-  pointer-events: none;
-  user-select: none;
+.page-bottom > .id-head,
+.page-bottom > .id-body {
+  position: relative;
+  z-index: 1;
+}
+
+.page-bottom > .watermark-seal {
+  z-index: 0;
 }
 
 .watermark-seal {
@@ -365,9 +510,10 @@ body {
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   position: relative;
   z-index: 1;
+  flex-shrink: 0;
 }
 
 .id-brand {
@@ -376,13 +522,6 @@ body {
   align-items: flex-start;
   gap: 6px;
   min-width: 0;
-}
-
-.cursor-wordmark {
-  display: block;
-  width: 120px;
-  height: auto;
-  border: 0;
 }
 
 .id-brand .brand-sub {
@@ -404,135 +543,136 @@ body {
 
 .id-body {
   display: grid;
-  grid-template-columns: 168px 1fr 12px;
-  gap: 22px;
-  align-items: start;
+  grid-template-columns: var(--photo-size) 1fr;
+  gap: 16px;
+  align-items: center;
+  align-content: center;
   position: relative;
   z-index: 1;
   flex: 1;
+  min-height: 0;
 }
 
 .photo-col {
-  width: 168px;
+  width: var(--photo-size);
+  max-width: 100%;
 }
 
 .photo {
-  width: 168px;
+  width: 100%;
   background: #111;
   border: 1px solid #333;
   overflow: hidden;
 }
 
 .photo-art {
-  width: 168px;
-  height: 168px;
-  background:
-    radial-gradient(circle at 30% 30%, #3b82f6 0%, transparent 40%),
-    radial-gradient(circle at 70% 55%, #f54e00 0%, transparent 42%),
-    radial-gradient(circle at 45% 75%, #22c55e 0%, transparent 35%),
-    #111;
-  image-rendering: pixelated;
-  filter: contrast(1.15) saturate(1.2);
-}
-
-.photo-code {
-  height: 24px;
-  display: grid;
-  place-items: center;
+  width: 100%;
+  height: var(--photo-size);
+  aspect-ratio: 1;
   background: #111;
 }
 
-.qr {
-  width: 16px;
-  height: 16px;
-  background:
-    repeating-linear-gradient(0deg, #fff 0 2px, transparent 2px 4px),
-    repeating-linear-gradient(90deg, #fff 0 2px, transparent 2px 4px);
-  opacity: 0.7;
-}
-
-.photo-caption {
-  margin-top: 6px;
-  text-align: center;
-  font-family: var(--sans);
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  color: var(--muted);
+.photo-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
 }
 
 .identity {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 14px;
+  align-items: stretch;
+  gap: 10px;
   min-width: 0;
-  padding-top: 4px;
+  min-height: 0;
+  padding-top: 0;
+  width: 100%;
 }
 
-.identity .row {
-  margin-bottom: 0;
+.identity-names {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 16px;
+  row-gap: 0;
+  width: 100%;
+}
+
+.identity-names .row,
+.identity > .row {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: 10px;
+  align-items: baseline;
+  width: 100%;
 }
 
 .identity .label {
   font-family: var(--sans);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 400;
   color: var(--muted);
   letter-spacing: -0.01em;
-  margin-bottom: 2px;
+  margin: 0;
+  text-align: left;
+  white-space: nowrap;
 }
 
-.identity .value {
+.identity .value,
+.identity a.value,
+.identity a.value-link {
   font-family: var(--sans);
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 400;
   letter-spacing: -0.015em;
-  line-height: 1.2;
-  border-bottom: 1px solid #e0d9ce;
-  padding-bottom: 8px;
-}
-
-.identity .row:last-child .value {
-  font-size: 16px;
-  letter-spacing: -0.01em;
+  line-height: 1.15;
   color: var(--ink);
+  border-bottom: 1px solid #e0d9ce;
+  padding-bottom: 2px;
+  min-width: 0;
+  text-align: left;
+  box-sizing: border-box;
 }
 
-.identity a.value {
-  color: #007aff;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+/* Social rows stay ink + no underline (match plain identity values) */
+.identity a.value,
+.identity a.value:link,
+.identity a.value:visited,
+.identity a.value:hover,
+.identity a.value:active,
+.identity a.value:focus,
+.identity a.value:focus-visible {
+  color: var(--ink);
+  text-decoration: none;
   display: block;
 }
 
-.holo {
-  width: 8px;
-  height: 200px;
-  border-radius: 2px;
-  background: linear-gradient(
-    180deg,
-    #a8e6cf 0%,
-    #7ec8e3 25%,
-    #c3b1e1 50%,
-    #ffd3a5 75%,
-    #a8e6cf 100%
-  );
-  margin-top: 2px;
+.page-bottom > .mrz {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  background: #ddd8cf;
+  border-radius: 0 0 var(--passport-radius-bottom) var(--passport-radius-bottom);
+  padding: 12px 16px 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  line-height: 1.55;
+  overflow: hidden;
+  pointer-events: none;
 }
 
-.mrz {
-  margin-top: auto;
-  background: #ddd8cf;
-  border-radius: 2px;
-  padding: 10px 12px;
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 1px;
-  line-height: 1.7;
-  word-break: break-all;
-  position: relative;
-  z-index: 1;
+.mrz > div {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
 }
 
 .actions {
@@ -544,25 +684,9 @@ body {
   text-align: center;
 }
 
-.share {
-  appearance: none;
-  border: 0;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--sans);
-  font-size: 14px;
-  font-weight: 500;
-  padding: 12px 20px;
-  border-radius: 999px;
-  background: #171717;
-  color: #fcfcf9;
-}
-
 .meta {
   width: 100%;
-  margin: 4px 0 0;
+  margin: 0;
   font-family: var(--sans);
   font-size: 12px;
   color: var(--muted);
@@ -574,7 +698,9 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .spine {
+  .spine,
+  .spine-left,
+  .spine-right {
     display: none;
   }
 
@@ -582,9 +708,12 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .holo {
-    width: 100%;
-    height: 8px;
+  .photo-col {
+    width: min(var(--photo-size), 100%);
+  }
+
+  .photo-art {
+    height: auto;
   }
 
   .cover-title,

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   buildMrz,
   readPassportFromSearch,
+  socialHandle,
   type PassportData,
 } from "./passportData";
 import "./passport.css";
@@ -38,10 +39,10 @@ export function PassportPage() {
   const [data, setData] = useState<PassportData>(() =>
     readPassportFromSearch(window.location.search),
   );
-  const [copied, setCopied] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
+    setData(readPassportFromSearch(window.location.search));
     const onPopState = () => {
       setData(readPassportFromSearch(window.location.search));
     };
@@ -53,17 +54,7 @@ export function PassportPage() {
     document.title = `${data.firstName} ${data.lastName} · Codechella Passport`;
   }, [data.firstName, data.lastName]);
 
-  const [mrz1, mrz2] = useMemo(() => buildMrz(data), [data]);
-
-  async function handleShare() {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
-    } catch {
-      window.prompt("Copy this passport link:", window.location.href);
-    }
-  }
+  const [mrz1, mrz2] = useMemo(() => buildMrz(), []);
 
   function toggleOpen() {
     setIsOpen((open) => !open);
@@ -102,40 +93,56 @@ export function PassportPage() {
             </button>
 
             <section className="face face-credits" aria-label="Credits and sponsors">
-              <div className="spine">Credits &amp; Sponsors</div>
+              <div className="spine spine-left">Credits &amp; Sponsors</div>
               <div className="page-top-main">
                 <div className="header">
-                  <div className="dots">
-                    <span className="dot green" />
-                    <span className="dot blue" />
-                  </div>
+                  <img
+                    className="cursor-wordmark"
+                    src="/assets/cursor-lockup-light.png"
+                    alt="Cursor"
+                    width={120}
+                    height={28}
+                  />
                   <h1 className="event-title">{data.eventTitle}</h1>
                 </div>
-                <div className="sticker-slot" aria-label="Sticker area" />
+                <div className="boats-zone" aria-hidden="true">
+                  <img
+                    className="watermark-watertaxis"
+                    src="/assets/watertaxis.png"
+                    alt=""
+                    draggable={false}
+                  />
+                </div>
+                <div className="sponsor-banners" aria-label="Sponsors">
+                  <div className="sponsor-row">
+                    <img src="/assets/sponsors/row/solana.png" alt="Solana" draggable={false} />
+                    <img src="/assets/sponsors/row/convex.png" alt="Convex" draggable={false} />
+                    <img src="/assets/sponsors/row/shipaton.png" alt="Ship-a-ton" draggable={false} />
+                    <img src="/assets/sponsors/row/uvec.png" alt="UVEC" draggable={false} />
+                    <img src="/assets/sponsors/row/gmi.png" alt="GMI" draggable={false} />
+                  </div>
+                  <div className="sponsor-row">
+                    <img src="/assets/sponsors/row/elevenlabs.png" alt="ElevenLabs" draggable={false} />
+                    <img src="/assets/sponsors/row/exa.png" alt="Exa" draggable={false} />
+                    <img src="/assets/sponsors/row/render.png" alt="Render" draggable={false} />
+                    <img src="/assets/sponsors/row/firecrawl.png" alt="Firecrawl" draggable={false} />
+                    <img src="/assets/sponsors/row/wispr-flow.png" alt="Wispr Flow" draggable={false} />
+                    <img src="/assets/sponsors/row/mintlify.png" alt="Mintlify" draggable={false} />
+                  </div>
+                </div>
+              </div>
+              <div className="spine spine-right" aria-hidden="true">
+                Credits &amp; Sponsors
               </div>
             </section>
           </div>
 
           {/* Identity page — always the bottom half */}
           <section className="page-bottom">
-            <img
-              className="watermark-building"
-              src="/assets/victoria-parliament-watermark.png"
-              alt=""
-              width={200}
-              height={117}
-            />
             <div className="watermark-seal" aria-hidden="true" />
 
             <div className="id-head">
               <div className="id-brand">
-                <img
-                  className="cursor-wordmark"
-                  src="/assets/cursor-lockup-light.png"
-                  alt="Cursor"
-                  width={120}
-                  height={28}
-                />
                 <div className="brand-sub">
                   Codechella Passport · {data.location} · {data.eventDate}
                 </div>
@@ -146,21 +153,35 @@ export function PassportPage() {
             <div className="id-body">
               <div className="photo-col">
                 <div className="photo">
-                  <div className="photo-art" aria-hidden="true" />
-                  <div className="photo-code">
-                    <div className="qr" />
+                  <div className="photo-art" aria-hidden="true">
+                    <img src="/assets/portrait.png" alt="" />
                   </div>
                 </div>
-                <div className="photo-caption">Photo</div>
               </div>
 
               <div className="identity">
-                <IdentityRow label="Last name" value={data.lastName} />
-                <IdentityRow label="First name" value={data.firstName} />
+                <div className="identity-names">
+                  <IdentityRow label="First name" value={data.firstName} />
+                  <IdentityRow label="Last name" value={data.lastName} />
+                </div>
                 <IdentityRow label="Based in" value={data.location} />
+                <IdentityRow label="Role" value="Organizer" />
+                <IdentityRow
+                  label="LinkedIn"
+                  value={socialHandle(data.linkedin, "alhwyn")}
+                  href={data.linkedin}
+                />
+                <IdentityRow
+                  label="Twitter"
+                  value={socialHandle(data.twitter, "@alhwynn")}
+                  href={data.twitter}
+                />
+                <IdentityRow
+                  label="GitHub"
+                  value={socialHandle(data.github, "@alhwyn")}
+                  href={data.github}
+                />
               </div>
-
-              <div className="holo" aria-hidden="true" />
             </div>
 
             <div className="mrz">
@@ -172,9 +193,6 @@ export function PassportPage() {
       </div>
 
       <div className="actions">
-        <button type="button" className="share" onClick={handleShare}>
-          {copied ? "Link copied" : "Share your passport"}
-        </button>
         <p className="meta">
           Codechella Hackathon · {data.location} · {data.eventDate}
         </p>
