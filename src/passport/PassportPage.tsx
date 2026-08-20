@@ -42,6 +42,7 @@ export function PassportPage() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
+    setData(readPassportFromSearch(window.location.search));
     const onPopState = () => {
       setData(readPassportFromSearch(window.location.search));
     };
@@ -149,7 +150,9 @@ export function PassportPage() {
             <div className="id-body">
               <div className="photo-col">
                 <div className="photo">
-                  <div className="photo-art" aria-hidden="true" />
+                  <div className="photo-art" aria-hidden="true">
+                    <img src="/assets/portrait.png" alt="" />
+                  </div>
                 </div>
               </div>
 
@@ -159,7 +162,7 @@ export function PassportPage() {
                   <IdentityRow label="Last name" value={data.lastName} />
                 </div>
                 <IdentityRow label="Based in" value={data.location} />
-                <IdentityRow label="Role" value={data.accessTier} />
+                <IdentityRow label="Role" value="Organizer" />
                 <IdentityRow
                   label="LinkedIn"
                   value={socialHandle(data.linkedin, "alhwyn")}

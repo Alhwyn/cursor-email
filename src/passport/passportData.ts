@@ -24,8 +24,9 @@ export interface PassportData {
 export function normalizeRole(value: string): PassportRole {
   const v = value.trim().toLowerCase();
   if (v === "guest") return "Guest";
+  if (v === "builder") return "Builder";
   if (v === "organizer") return "Organizer";
-  return "Builder";
+  return "Organizer";
 }
 
 export const defaultPassportData: PassportData = {
@@ -34,12 +35,12 @@ export const defaultPassportData: PassportData = {
   title: "Founder",
   company: "Photobomb.online",
   companyUrl: "https://photobomb.online",
-  passportNumber: "CURSORVIC2026001",
+  passportNumber: "CURSOR2026001",
   issueDate: "27 JUL 2026",
   eventDate: "August 22nd",
   stampDate: "22 AUG\n2026",
   location: "Victoria, BC",
-  accessTier: "Builder" as PassportRole,
+  accessTier: "Organizer" as PassportRole,
   entries: "Multiple (M)",
   authority: "Cursor Dept. of Events",
   eventTitle: "Codechella Victoria 2026",
@@ -126,7 +127,17 @@ export function readPassportFromSearch(search: string): PassportData {
     next.stampDate = "22 AUG\n2026";
   }
 
-  next.accessTier = normalizeRole(next.accessTier);
+  // Canonical role for this passport (URL often still has stale accessTier=Builder).
+  next.accessTier = "Organizer";
+
+  // Canonical serial (rewrites short/stale CUR2026001 / CURSORVIC… query values).
+  if (
+    !next.passportNumber ||
+    /^CUR\d/i.test(next.passportNumber) ||
+    /^CURSORVIC/i.test(next.passportNumber)
+  ) {
+    next.passportNumber = defaultPassportData.passportNumber;
+  }
 
   return next;
 }
