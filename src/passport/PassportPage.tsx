@@ -114,18 +114,21 @@ export function PassportPage() {
                   />
                 </div>
                 <div className="sponsor-banners" aria-label="Sponsors">
-                  <img
-                    className="sponsor-banner"
-                    src="/assets/sponsors/logos-top.png"
-                    alt="Sponsors: Convex, Ship-a-ton, UVEC, GMI"
-                    draggable={false}
-                  />
-                  <img
-                    className="sponsor-banner sponsor-banner--bottom"
-                    src="/assets/sponsors/logos-bottom.png"
-                    alt="Sponsors: Exa, Render, Firecrawl, Wispr Flow"
-                    draggable={false}
-                  />
+                  <div className="sponsor-row">
+                    <img src="/assets/sponsors/row/solana.png" alt="Solana" draggable={false} />
+                    <img src="/assets/sponsors/row/convex.png" alt="Convex" draggable={false} />
+                    <img src="/assets/sponsors/row/shipaton.png" alt="Ship-a-ton" draggable={false} />
+                    <img src="/assets/sponsors/row/uvec.png" alt="UVEC" draggable={false} />
+                    <img src="/assets/sponsors/row/gmi.png" alt="GMI" draggable={false} />
+                  </div>
+                  <div className="sponsor-row">
+                    <img src="/assets/sponsors/row/elevenlabs.png" alt="ElevenLabs" draggable={false} />
+                    <img src="/assets/sponsors/row/exa.png" alt="Exa" draggable={false} />
+                    <img src="/assets/sponsors/row/render.png" alt="Render" draggable={false} />
+                    <img src="/assets/sponsors/row/firecrawl.png" alt="Firecrawl" draggable={false} />
+                    <img src="/assets/sponsors/row/wispr-flow.png" alt="Wispr Flow" draggable={false} />
+                    <img src="/assets/sponsors/row/mintlify.png" alt="Mintlify" draggable={false} />
+                  </div>
                 </div>
               </div>
               <div className="spine spine-right" aria-hidden="true">
