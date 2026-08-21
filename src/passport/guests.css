@@ -218,6 +218,17 @@
   transition: opacity 0.15s ease;
 }
 
+.crm-btn--secondary {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.crm-btn--secondary:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--ink) 35%, var(--line));
+  opacity: 1;
+}
+
 .crm-btn:hover:not(:disabled) {
   opacity: 0.9;
 }
@@ -225,6 +236,13 @@
 .crm-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+.crm-csv-hint {
+  margin: -12px 0 24px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
 }
 
 .crm-pill {

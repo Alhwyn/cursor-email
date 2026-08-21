@@ -1,33 +1,21 @@
 #!/usr/bin/env bun
 /**
- * Seed guests into Convex from a local JSON file.
+ * Seed guests into Convex from a local JSON or CSV file.
  *
- * 1. Copy data/guests.example.json → data/guests.json (gitignored)
- * 2. Ensure `npx convex dev` is running (or CONVEX_URL / VITE_CONVEX_URL is set)
+ * 1. Copy data/guests.example.json → data/guests.json (or use .csv)
+ * 2. Ensure `npx convex dev` is running (or CONVEX_URL is set)
  * 3. bun run seed:guests
+ *    bun run seed:guests data/guests.csv
  *
+ * Prefer uploading CSV from /guests in the browser (admin secret).
  * Never commit real guest CSVs, emails, phones, or photos.
  */
 
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
+import { parseGuestsCsv, type GuestCsvRow } from "../src/passport/parseGuestsCsv";
 
-type GuestSeed = {
-  email: string;
-  name: string;
-  firstName: string;
-  lastName: string;
-  ticketName: string;
-  city: string;
-  company: string;
-  building: string;
-  linkedin?: string;
-  twitter?: string;
-  github?: string;
-  passportUrl?: string;
-  passportId?: string;
-  photoUrl?: string;
-  lumaGuestId?: string;
+type GuestSeed = GuestCsvRow & {
   emailStatus?: "none" | "sent" | "opened" | "read";
   sentAt?: number;
   openedAt?: number;
@@ -48,20 +36,28 @@ if (!convexUrl) {
 const file = Bun.file(dataPath);
 if (!(await file.exists())) {
   console.error(
-    `Missing ${dataPath}. Copy data/guests.example.json → data/guests.json and fill it in.`,
+    `Missing ${dataPath}. Copy data/guests.example.json → data/guests.json (or use .csv) and fill it in.`,
   );
   process.exit(1);
 }
 
-const guests = (await file.json()) as GuestSeed[];
-if (!Array.isArray(guests)) {
-  console.error("Expected guests JSON to be an array of guest objects.");
-  process.exit(1);
+const text = await file.text();
+let guests: GuestSeed[];
+
+if (dataPath.endsWith(".csv")) {
+  guests = parseGuestsCsv(text);
+} else {
+  const parsed: unknown = JSON.parse(text);
+  if (!Array.isArray(parsed)) {
+    console.error("Expected guests JSON to be an array of guest objects.");
+    process.exit(1);
+  }
+  guests = parsed as GuestSeed[];
 }
 
 const client = new ConvexHttpClient(convexUrl);
 const result = await client.mutation(api.guests.upsertGuests, { guests });
 
 console.log(
-  `Seeded ${guests.length} guests → inserted ${result.inserted}, updated ${result.updated}`,
+  `Seeded ${guests.length} guests from ${dataPath} → inserted ${result.inserted}, updated ${result.updated}`,
 );

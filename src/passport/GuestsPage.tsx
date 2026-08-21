@@ -1,7 +1,15 @@
-import { useAction, useQuery } from "convex/react";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useAction, useMutation, useQuery } from "convex/react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type ReactNode,
+} from "react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
+import { parseGuestsCsv } from "./parseGuestsCsv";
 import "./guests.css";
 
 const ADMIN_SECRET_KEY = "codechella_admin_secret";
@@ -113,12 +121,15 @@ export function GuestsPage() {
   const guests = useQuery(api.guests.listGuests);
   const sendGuestEmail = useAction(api.emails.sendGuestEmail);
   const sendAllUnsent = useAction(api.emails.sendAllUnsent);
+  const importGuests = useMutation(api.guests.importGuests);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [query, setQuery] = useState("");
   const [adminSecret, setAdminSecret] = useState("");
   const [adminReady, setAdminReady] = useState(false);
   const [sendingId, setSendingId] = useState<Id<"guests"> | null>(null);
   const [sendingAll, setSendingAll] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [adminMessage, setAdminMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -214,6 +225,32 @@ export function GuestsPage() {
     }
   }
 
+  async function handleCsvUpload(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !adminSecret.trim()) return;
+
+    setUploading(true);
+    setAdminMessage(null);
+    try {
+      const text = await file.text();
+      const rows = parseGuestsCsv(text);
+      const result = await importGuests({
+        adminSecret: adminSecret.trim(),
+        guests: rows,
+      });
+      setAdminMessage(
+        `Uploaded ${rows.length} from CSV → inserted ${result.inserted}, updated ${result.updated}.`,
+      );
+    } catch (error) {
+      setAdminMessage(
+        error instanceof Error ? error.message : "CSV upload failed.",
+      );
+    } finally {
+      setUploading(false);
+    }
+  }
+
   return (
     <div className="crm-page">
       <GuestsHeader />
@@ -223,8 +260,8 @@ export function GuestsPage() {
             <p className="crm-eyebrow">Directory</p>
             <h1 className="crm-title">Guests</h1>
             <p className="crm-lede">
-              Codechella attendee CRM — photos, tickets, and passport email
-              status on the same paper stock as the credential.
+              Upload a guest CSV into Convex, then send the passport /
+              what-to-expect email from this page.
             </p>
           </div>
           <label>
@@ -242,7 +279,7 @@ export function GuestsPage() {
         <div className="crm-admin">
           <label>
             <span className="crm-admin-label">
-              Admin secret (required to send mail)
+              Admin secret (required to upload CSV + send mail)
             </span>
             <input
               type="password"
@@ -254,6 +291,21 @@ export function GuestsPage() {
           </label>
           {isAdmin ? (
             <div className="crm-admin-actions">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,text/csv"
+                className="sr-only"
+                onChange={e => void handleCsvUpload(e)}
+              />
+              <button
+                type="button"
+                className="crm-btn crm-btn--secondary"
+                disabled={uploading}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {uploading ? "Uploading…" : "Upload CSV"}
+              </button>
               <SendButton
                 label={`Send all unsent (${unsentCount})`}
                 busy={sendingAll}
@@ -266,19 +318,28 @@ export function GuestsPage() {
             </div>
           ) : (
             <p className="crm-admin-hint">
-              Enter the organizer secret to unlock Send. Status stays visible
-              either way.
+              Enter the organizer secret to unlock CSV upload and Send.
             </p>
           )}
         </div>
+
+        {isAdmin ? (
+          <p className="crm-csv-hint">
+            CSV needs an <code>email</code> column. Optional: name / firstName /
+            lastName, ticketName, city, company, building, passportUrl,
+            passportId, photoUrl, linkedin, twitter, github. See{" "}
+            <code>data/guests.example.csv</code>. Real guest CSVs stay
+            gitignored.
+          </p>
+        ) : null}
 
         {guests === undefined ? (
           <p className="crm-empty">Loading guests…</p>
         ) : guests.length === 0 ? (
           <p className="crm-empty">
-            No guests yet. Copy{" "}
-            <code>data/guests.example.json</code> to{" "}
-            <code>data/guests.json</code> and run{" "}
+            No guests yet. Unlock with the admin secret and upload a CSV, or
+            copy <code>data/guests.example.csv</code> /{" "}
+            <code>data/guests.example.json</code> and run{" "}
             <code>bun run seed:guests</code>.
           </p>
         ) : filtered.length === 0 ? (

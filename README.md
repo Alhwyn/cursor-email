@@ -28,35 +28,49 @@ bun run passport:dev
 - Passport: [http://localhost:3010](http://localhost:3010) (query params or `/{uuid}`)
 - Guest CRM: [http://localhost:3010/guests](http://localhost:3010/guests) (alias `/crm`)
 
-## Seed guests (no real PII)
+## Workflow: upload CSV → Convex → send
 
-```bash
-cp data/guests.example.json data/guests.json
-bun run seed:guests
-```
-
-`data/guests.json` and `*.csv` are gitignored. Never commit real Codechella
-guest emails, photos, or Luma exports.
-
-## Admin send + dry-run
-
-Set secrets on the **Convex deployment** (not in the Vite frontend):
+1. Set Convex secrets (once):
 
 ```bash
 npx convex env set ADMIN_SECRET 'long-random-string'
-npx convex env set CONVEX_SITE_URL "$VITE_CONVEX_SITE_URL"   # tracking base
-# Optional — omit RESEND_API_KEY to dry-run:
+# Tracking base is usually auto-set as CONVEX_SITE_URL on cloud;
+# for local anonymous backends set SITE_URL:
+npx convex env set SITE_URL "$VITE_CONVEX_SITE_URL"
+# Real sends (omit = dry-run, status still becomes "sent"):
 # npx convex env set RESEND_API_KEY 're_…'
 # npx convex env set EMAIL_FROM 'Cursor Codechella <noreply@cursorvictoria.com>'
 ```
 
-On `/guests`:
+2. Open [http://localhost:3010/guests](http://localhost:3010/guests)
+3. Paste `ADMIN_SECRET` → **Upload CSV** → guests land in Convex
+4. Click **Send** / **Resend** on a row, or **Send all unsent**
 
-1. Paste `ADMIN_SECRET` into the admin field (stored in `localStorage`).
-2. Without it, email status pills stay visible but **Send is locked**.
-3. With it, **Send** / **Resend** / **Send all unsent** call Convex actions.
-4. If `RESEND_API_KEY` is missing, sends **dry-run**: logs to Convex, still
-   advances status `none → sent` so the CRM is demoable without emailing people.
+CSV needs an `email` column. Optional headers (aliases work): `name`,
+`firstName`, `lastName`, `ticketName` / `Ticket Type`, `city`, `company`,
+`building`, `passportUrl`, `passportId`, `photoUrl`, socials. Example:
+`data/guests.example.csv`. Missing `passportUrl` gets `/{uuid}` on this origin.
+
+### CLI seed (optional)
+
+```bash
+cp data/guests.example.json data/guests.json
+bun run seed:guests
+# or
+bun run seed:guests data/guests.csv
+```
+
+`data/guests.json` and `*.csv` (except `data/guests.example.csv`) are
+gitignored. Never commit real Codechella guest emails, photos, or Luma exports.
+
+## Admin send + dry-run
+
+Without `ADMIN_SECRET` in the UI, status pills stay visible but **Upload** and
+**Send** stay locked. With it:
+
+- **Send** / **Resend** / **Send all unsent** call Convex actions
+- If `RESEND_API_KEY` is missing, sends **dry-run**: logs to Convex, still
+  advances status `none → sent` so the CRM is demoable without emailing people
 
 Tracking HTTP routes on the Convex site URL:
 

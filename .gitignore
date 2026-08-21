@@ -13,5 +13,6 @@ dist
 # Guest PII — never commit real Luma exports or seeded guest data
 data/guests.json
 *.csv
+!data/guests.example.csv
 guests*.csv
 luma*.csv

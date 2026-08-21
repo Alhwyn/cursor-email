@@ -201,10 +201,108 @@ export const getGuestByPassportId = query({
   },
 });
 
+async function upsertGuestList(
+  ctx: MutationCtx,
+  guests: Array<{
+    email: string;
+    name: string;
+    firstName: string;
+    lastName: string;
+    ticketName: string;
+    city: string;
+    company: string;
+    building: string;
+    linkedin?: string;
+    twitter?: string;
+    github?: string;
+    passportUrl?: string;
+    passportId?: string;
+    photoUrl?: string;
+    photoStorageId?: Id<"_storage">;
+    lumaGuestId?: string;
+    emailStatus?: EmailStatus;
+    sentAt?: number;
+    openedAt?: number;
+    readAt?: number;
+  }>,
+): Promise<{ inserted: number; updated: number }> {
+  let inserted = 0;
+  let updated = 0;
+
+  for (const guest of guests) {
+    const email = guest.email.trim().toLowerCase();
+    if (!email) {
+      throw new Error("Guest email is required");
+    }
+
+    const baseFields = {
+      email,
+      name: guest.name.trim(),
+      firstName: guest.firstName.trim(),
+      lastName: guest.lastName.trim(),
+      ticketName: guest.ticketName.trim(),
+      city: guest.city.trim(),
+      company: guest.company.trim(),
+      building: guest.building.trim(),
+      linkedin: guest.linkedin,
+      twitter: guest.twitter,
+      github: guest.github,
+      passportUrl: guest.passportUrl,
+      passportId: guest.passportId,
+      photoUrl: guest.photoUrl,
+      photoStorageId: guest.photoStorageId,
+      lumaGuestId: guest.lumaGuestId,
+    };
+
+    const existing = await ctx.db
+      .query("guests")
+      .withIndex("by_email", q => q.eq("email", email))
+      .unique();
+
+    if (existing) {
+      const patch: Record<string, unknown> = { ...baseFields };
+      if (guest.emailStatus !== undefined) {
+        patch.emailStatus = guest.emailStatus;
+      }
+      if (guest.sentAt !== undefined) patch.sentAt = guest.sentAt;
+      if (guest.openedAt !== undefined) patch.openedAt = guest.openedAt;
+      if (guest.readAt !== undefined) patch.readAt = guest.readAt;
+      if (!existing.emailToken) {
+        patch.emailToken = newEmailToken();
+      }
+      await ctx.db.patch(existing._id, patch);
+      updated += 1;
+    } else {
+      await ctx.db.insert("guests", {
+        ...baseFields,
+        emailStatus: guest.emailStatus ?? "none",
+        sentAt: guest.sentAt,
+        openedAt: guest.openedAt,
+        readAt: guest.readAt,
+        emailToken: newEmailToken(),
+      });
+      inserted += 1;
+    }
+  }
+
+  return { inserted, updated };
+}
+
+function assertAdminSecret(adminSecret: string): void {
+  const expected = process.env.ADMIN_SECRET;
+  if (!expected) {
+    throw new Error(
+      "ADMIN_SECRET is not configured on the Convex deployment. Set it with `npx convex env set ADMIN_SECRET …`.",
+    );
+  }
+  if (adminSecret !== expected) {
+    throw new Error("Unauthorized");
+  }
+}
+
 /**
- * Upsert guests by email (admin / seed). Email is the unique key.
- * WARNING: This mutation is currently public so the seed script can call it.
- * Restrict with auth before production use.
+ * Upsert guests by email (CLI seed). Email is the unique key.
+ * WARNING: Public so the seed script can call it — use importGuests from the CRM.
  */
 export const upsertGuests = mutation({
   args: { guests: v.array(guestInput) },
@@ -213,66 +311,26 @@ export const upsertGuests = mutation({
     updated: v.number(),
   }),
   handler: async (ctx, args) => {
-    let inserted = 0;
-    let updated = 0;
+    return await upsertGuestList(ctx, args.guests);
+  },
+});
 
-    for (const guest of args.guests) {
-      const email = guest.email.trim().toLowerCase();
-      if (!email) {
-        throw new Error("Guest email is required");
-      }
-
-      const baseFields = {
-        email,
-        name: guest.name.trim(),
-        firstName: guest.firstName.trim(),
-        lastName: guest.lastName.trim(),
-        ticketName: guest.ticketName.trim(),
-        city: guest.city.trim(),
-        company: guest.company.trim(),
-        building: guest.building.trim(),
-        linkedin: guest.linkedin,
-        twitter: guest.twitter,
-        github: guest.github,
-        passportUrl: guest.passportUrl,
-        passportId: guest.passportId,
-        photoUrl: guest.photoUrl,
-        photoStorageId: guest.photoStorageId,
-        lumaGuestId: guest.lumaGuestId,
-      };
-
-      const existing = await ctx.db
-        .query("guests")
-        .withIndex("by_email", q => q.eq("email", email))
-        .unique();
-
-      if (existing) {
-        const patch: Record<string, unknown> = { ...baseFields };
-        if (guest.emailStatus !== undefined) {
-          patch.emailStatus = guest.emailStatus;
-        }
-        if (guest.sentAt !== undefined) patch.sentAt = guest.sentAt;
-        if (guest.openedAt !== undefined) patch.openedAt = guest.openedAt;
-        if (guest.readAt !== undefined) patch.readAt = guest.readAt;
-        if (!existing.emailToken) {
-          patch.emailToken = newEmailToken();
-        }
-        await ctx.db.patch(existing._id, patch);
-        updated += 1;
-      } else {
-        await ctx.db.insert("guests", {
-          ...baseFields,
-          emailStatus: guest.emailStatus ?? "none",
-          sentAt: guest.sentAt,
-          openedAt: guest.openedAt,
-          readAt: guest.readAt,
-          emailToken: newEmailToken(),
-        });
-        inserted += 1;
-      }
-    }
-
-    return { inserted, updated };
+/**
+ * Admin-only upsert for CSV upload from /guests.
+ * Requires ADMIN_SECRET (same secret as Send).
+ */
+export const importGuests = mutation({
+  args: {
+    adminSecret: v.string(),
+    guests: v.array(guestInput),
+  },
+  returns: v.object({
+    inserted: v.number(),
+    updated: v.number(),
+  }),
+  handler: async (ctx, args) => {
+    assertAdminSecret(args.adminSecret);
+    return await upsertGuestList(ctx, args.guests);
   },
 });
 
