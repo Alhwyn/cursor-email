@@ -1,0 +1,8 @@
+{
+  "buildCommand": "bun run passport:build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
