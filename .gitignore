@@ -15,3 +15,6 @@ data/guests.json
 *.csv
 !data/guests.example.csv
 luma*.csv
+
+# Vercel local link / anonymous deploy metadata
+.vercel
