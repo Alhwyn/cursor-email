@@ -9,6 +9,7 @@ import {
 } from "react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
+import { emailPreviewHref } from "./EmailPreviewPage";
 import { parseGuestsCsv } from "./parseGuestsCsv";
 import "./guests.css";
 
@@ -70,6 +71,23 @@ function EmailStatusPill({ status }: { status: EmailStatus }) {
 
 function EmptyCell({ children }: { children?: ReactNode }) {
   return <span className="crm-muted">{children ?? "—"}</span>;
+}
+
+function PreviewLink({
+  guest,
+}: {
+  guest: { email: string; passportId?: string };
+}) {
+  return (
+    <a
+      className="crm-preview-link"
+      href={emailPreviewHref(guest)}
+      target="_blank"
+      rel="noreferrer"
+    >
+      Preview
+    </a>
+  );
 }
 
 function SendButton({
@@ -381,6 +399,7 @@ export function GuestsPage() {
                         <p className="crm-card-building">{guest.building}</p>
                       ) : null}
                       <div className="crm-card-actions">
+                        <PreviewLink guest={guest} />
                         {isAdmin ? (
                           <SendButton
                             label={
@@ -410,6 +429,7 @@ export function GuestsPage() {
                     <th>Company</th>
                     <th>Building</th>
                     <th>Status</th>
+                    <th>Preview</th>
                     <th>Mail</th>
                   </tr>
                 </thead>
@@ -438,6 +458,9 @@ export function GuestsPage() {
                       </td>
                       <td>
                         <EmailStatusPill status={guest.emailStatus} />
+                      </td>
+                      <td>
+                        <PreviewLink guest={guest} />
                       </td>
                       <td>
                         {isAdmin ? (

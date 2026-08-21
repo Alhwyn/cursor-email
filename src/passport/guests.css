@@ -452,11 +452,57 @@
 
 .crm-card-actions {
   margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.crm-preview-link {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--line);
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.crm-preview-link:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
 }
 
 .crm-locked {
   color: var(--muted);
   font-size: 13px;
+}
+
+.email-preview-hero {
+  align-items: flex-start;
+}
+
+.email-preview-meta {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--muted);
+  font-family: var(--mono);
+}
+
+.email-preview-frame {
+  display: block;
+  width: 100%;
+  min-height: min(80vh, 900px);
+  height: 80vh;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  background-image:
+    radial-gradient(rgba(110, 95, 70, 0.03) 0.55px, transparent 0.7px),
+    var(--paper-grain);
+  background-size: 2.5px 2.5px, 170px 170px;
 }
 
 .sr-only {
