@@ -7,10 +7,13 @@
     "email:dev": "email dev --dir src/emails --port 3001",
     "passport:dev": "vite --port 3010",
     "passport:build": "vite build",
-    "typecheck": "tsc --noEmit"
+    "convex:dev": "convex dev",
+    "seed:guests": "bun run scripts/seed-guests.ts",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p convex/tsconfig.json"
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/node": "^26.2.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
@@ -20,6 +23,7 @@
   "dependencies": {
     "@react-email/components": "^1.0.12",
     "@react-email/ui": "^6.9.1",
+    "convex": "^1.44.0",
     "react": "^19.0.0",
     "react-dom": "^19.2.8",
     "react-email": "^6.0.0"

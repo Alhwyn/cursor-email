@@ -6,3 +6,12 @@ dist
 .env
 .env.*
 !.env.example
+
+# Convex local anonymous backend
+.convex
+
+# Guest PII — never commit real Luma exports or seeded guest data
+data/guests.json
+*.csv
+guests*.csv
+luma*.csv

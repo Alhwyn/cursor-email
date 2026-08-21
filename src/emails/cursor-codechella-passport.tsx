@@ -34,7 +34,7 @@ export function CursorCodechellaPassport({
   location = defaultPassportData.location,
   eventDate = defaultPassportData.eventDate,
   passportUrl,
-  ctaLabel = "Open your passport",
+  ctaLabel = "View details",
 }: CursorCodechellaPassportProps) {
   const href =
     passportUrl ??
@@ -207,5 +207,5 @@ CursorCodechellaPassport.PreviewProps = {
   location: "Victoria, BC",
   eventDate: "August 22nd",
   passportUrl: buildPassportUrl(PASSPORT_BASE_URL),
-  ctaLabel: "Open your passport",
+  ctaLabel: "View details",
 } satisfies CursorCodechellaPassportProps;
