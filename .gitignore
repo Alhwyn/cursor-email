@@ -14,5 +14,4 @@ dist
 data/guests.json
 *.csv
 !data/guests.example.csv
-guests*.csv
 luma*.csv
