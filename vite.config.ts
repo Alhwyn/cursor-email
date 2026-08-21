@@ -8,4 +8,10 @@ export default defineConfig({
     port: 3010,
     strictPort: true,
   },
+  preview: {
+    port: 3010,
+    strictPort: true,
+  },
+  // SPA fallback so /guests, /crm, and /:uuid serve index.html
+  appType: "spa",
 });

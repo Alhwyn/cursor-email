@@ -1,6 +1,9 @@
+import { useQuery } from "convex/react";
 import { useEffect, useMemo, useState } from "react";
+import { api } from "../../convex/_generated/api";
 import {
   buildMrz,
+  defaultPassportData,
   readPassportFromSearch,
   socialHandle,
   type PassportData,
@@ -35,20 +38,64 @@ function IdentityRow({
   );
 }
 
-export function PassportPage() {
-  const [data, setData] = useState<PassportData>(() =>
+function guestToPassport(guest: {
+  firstName: string;
+  lastName: string;
+  company: string;
+  city: string;
+  passportId?: string;
+  linkedin?: string;
+  twitter?: string;
+  github?: string;
+  resolvedPhotoUrl: string | null;
+}): PassportData {
+  return {
+    ...defaultPassportData,
+    firstName: guest.firstName || defaultPassportData.firstName,
+    lastName: guest.lastName || defaultPassportData.lastName,
+    company: guest.company || defaultPassportData.company,
+    location: guest.city || defaultPassportData.location,
+    passportNumber:
+      guest.passportId?.toUpperCase().startsWith("CURSOR")
+        ? guest.passportId
+        : guest.passportId
+          ? `CURSOR${guest.passportId.slice(0, 8).toUpperCase()}`
+          : defaultPassportData.passportNumber,
+    linkedin: guest.linkedin ?? "",
+    twitter: guest.twitter ?? "",
+    github: guest.github ?? "",
+  };
+}
+
+export function PassportPage({ passportId }: { passportId?: string }) {
+  const guest = useQuery(
+    api.guests.getGuestByPassportId,
+    passportId ? { passportId } : "skip",
+  );
+
+  const [queryData, setQueryData] = useState<PassportData>(() =>
     readPassportFromSearch(window.location.search),
   );
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    setData(readPassportFromSearch(window.location.search));
+    setQueryData(readPassportFromSearch(window.location.search));
     const onPopState = () => {
-      setData(readPassportFromSearch(window.location.search));
+      setQueryData(readPassportFromSearch(window.location.search));
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
+
+  const data = useMemo(() => {
+    if (passportId && guest) {
+      return guestToPassport(guest);
+    }
+    return queryData;
+  }, [passportId, guest, queryData]);
+
+  const photoSrc =
+    (passportId && guest?.resolvedPhotoUrl) || "/assets/portrait.png";
 
   useEffect(() => {
     document.title = `${data.firstName} ${data.lastName} · Codechella Passport`;
@@ -59,7 +106,7 @@ export function PassportPage() {
     data.firstName.length > 9 || data.lastName.length > 9;
 
   function toggleOpen() {
-    setIsOpen((open) => !open);
+    setIsOpen(open => !open);
   }
 
   return (
@@ -156,7 +203,7 @@ export function PassportPage() {
               <div className="photo-col">
                 <div className="photo">
                   <div className="photo-art" aria-hidden="true">
-                    <img src="/assets/portrait.png" alt="" />
+                    <img src={photoSrc} alt="" />
                   </div>
                 </div>
               </div>
@@ -173,17 +220,17 @@ export function PassportPage() {
                 <IdentityRow
                   label="LinkedIn"
                   value={socialHandle(data.linkedin, "alhwyn")}
-                  href={data.linkedin}
+                  href={data.linkedin || undefined}
                 />
                 <IdentityRow
                   label="Twitter"
                   value={socialHandle(data.twitter, "@alhwynn")}
-                  href={data.twitter}
+                  href={data.twitter || undefined}
                 />
                 <IdentityRow
                   label="GitHub"
                   value={socialHandle(data.github, "@alhwyn")}
-                  href={data.github}
+                  href={data.github || undefined}
                 />
               </div>
             </div>
@@ -199,6 +246,10 @@ export function PassportPage() {
       <div className="actions">
         <p className="meta">
           Codechella Hackathon · {data.location} · {data.eventDate}
+          {" · "}
+          <a href="/guests" style={{ color: "inherit" }}>
+            Guests
+          </a>
         </p>
       </div>
     </div>
